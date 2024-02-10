@@ -19,7 +19,7 @@ import java.util.Optional;
 public class BookController {
     @Autowired
     private BookService bookService;
-    @PutMapping(path = "/newBook")
+    @PutMapping(path = "/book")
     public ResponseEntity<String> updateBook(@RequestBody Book book){
         boolean isExist = bookService.isBookExist(book.getIsbn());
         Book savedBook = bookService.save(book);
@@ -33,13 +33,16 @@ public class BookController {
     public ResponseEntity<String> findBookById(String isbn) {
         try {
             Optional<Book> foundBook = bookService.findBookById(isbn);
-            return foundBook
-                    .map(book -> new ResponseEntity<>("Found Book with ISBN " + book, HttpStatus.OK))
-                    .orElse(new ResponseEntity<>("No book found with ISBN " + isbn, HttpStatus.NOT_FOUND));
+            if (foundBook.isPresent()) {
+                return new ResponseEntity<>("Found Book with ISBN " + isbn, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>("No book found with ISBN " + isbn, HttpStatus.NOT_FOUND);
+            }
         } catch (Exception e) {
             return new ResponseEntity<>("Error processing request", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 
     @GetMapping(path = "/books")
     public ResponseEntity<List<Book>> getAllBooks(){
